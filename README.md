@@ -10,4 +10,4 @@ Ing. Paulo Chiliguano.
 - Troya Jaime.
 
 ### Nota:
-_Los detalles del proyecto se pueden observar en el archivo **Informe.markdown**._ :+1:
+_Los detalles del proyecto se pueden observar en el archivo **Informe.md**._ :+1:
