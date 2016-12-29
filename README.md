@@ -10,4 +10,4 @@ Ing. Paulo Chiliguano.
 - Troya Jaime.
 
 ### Nota:
-*El Informe del proyecto se puede observar en el README.markdown :Wink:
+*El Informe del proyecto se puede observar en el README.markdown* :Wink:
