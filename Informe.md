@@ -23,7 +23,7 @@ Es una plataforma de hardware y software de código abierto, basada en una senci
 
 ## 4. Código:
 
-###     * Arduino:
+###     1. Arduino:
 ```
 int potPin=0;
 void setup(){
@@ -36,7 +36,7 @@ Serial.write(val); //
 delay(100);
 }
 ```
-###     * Processing:
+###     2. Processing:
 ```
 /**
 * Programa PinPong.
