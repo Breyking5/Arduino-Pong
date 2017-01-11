@@ -17,6 +17,11 @@ La idea del proyecto fue encontrado en [hackster.io](https://www.hackster.io "T�
 
 El siguiente trabajo busca mejorar el juego clásico de _"Ping Pong"_ combinando los mecanismos que brinda Arduino para el control físico y Processing para la interfaz de usuario, brindado un juego entretenido y de una calidad visual agradable para el usuario.
 
+## 2. Objetivos:
+- Analizar el código base de referencia del juego de ping pong clásico para conocer su estructura y funcionamiento.
+- Desarrollar en processing la interfaz del juego actualizado de ping pong agregando mejorías al tomado como referencia.
+- Implementar la versión de la interfaz final en processing al respectivo circuito aplicado en Arduino.
+
 ## 2. Materiales:
 - 1 Arduino
 - 2 Potenciometros de 10 K ohms
@@ -57,6 +62,13 @@ void loop(){
 }
 ```
 ### * Processing:
+
+#### Notas:
+
+- Es necesario instalar la librería Minim. 
+- Se debe crear la fuente "AgencyFB-Bold-250.vlw" la cual será almacenada en una carpeta data donde tenga su sketch.
+- En la misma carpeta data del sketch también deben estar los 2 audios para los sonidos de la pelota nombrados como "ping.mp3 y pong.mp3".
+
 ```
 /*
 Arduino + Processing - Ping Pong
@@ -293,8 +305,15 @@ void keyPressed(){
   }
 }
 ```
+## 5. Recomendaciones:
+
+- Si no desea instalar la librería Minim o tiene problemas con la misma, opte por quitar las líneas de código que le brindan sonido al juego.
+- Si no tiene con quien jugar, puede implementar si desea líneas de código para permitir que el juego de ping pong nos asigne contra una máquina aleatoria.
+
 ## 5. Resultado:
+
 ### Se obtiene como resultado final un juego de ping pong con nuevas características añadidas a la base tomada de la fuente inicial:
+
 - En vez de solo ser a blanco y negro ahora tendrá un color verde claro y tonos b/n (dando una semejanza a una cancha de fútbol).
 - Se implementó un jugador 2, convirtiendo el juego en multiplayer, tienen marcadores individuales y un límite de victoria de 3 goles.
 - Ya no es un juego silencioso pues se asignaron 2 sonidos distintos, uno al ser golpeado el balón por un jugador y otro cuando el balón rebote en paredes.
