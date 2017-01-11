@@ -22,19 +22,19 @@ El siguiente trabajo busca mejorar el juego clásico de _"Ping Pong"_ combinando
 - Desarrollar en processing la interfaz del juego actualizado de ping pong agregando mejorías al tomado como referencia.
 - Implementar la versión de la interfaz final en processing al respectivo circuito aplicado en Arduino.
 
-## 2. Materiales:
+## 3. Materiales:
 - 1 Arduino
 - 2 Potenciometros de 10 K ohms
 - 6 Jumpers aproximadamente 10 Centímetros
 - 1 Protoboard
 
-## 3. Conceptos:
+## 4. Conceptos:
 
 Arduino | Processing
 -------------------------------------------------|-------------------------------------------------
 Es una plataforma de hardware y software de código abierto, basada en una sencilla placa con entradas y salidas, analógicas y digitales, en un entorno de desarrollo que está basado en el lenguaje de programación Processing. | Es un lenguaje de programación creado en 2001, el cual es capaz de representar o emular en 2 o 3D una serie de instrucciones para así mostrar un resultado gráfico.
 
-## 4. Código:
+## 5. Código:
 
 ### * Arduino:
 ```
@@ -305,15 +305,20 @@ void keyPressed(){
   }
 }
 ```
-## 5. Recomendaciones:
+## 6. Recomendaciones:
 
 - Si no desea instalar la librería Minim o tiene problemas con la misma, opte por quitar las líneas de código que le brindan sonido al juego.
 - Si no tiene con quien jugar, puede implementar si desea líneas de código para permitir que el juego de ping pong nos asigne contra una máquina aleatoria.
 
-## 5. Resultado:
+## 7. Resultado:
 
 ### Se obtiene como resultado final un juego de ping pong con nuevas características añadidas a la base tomada de la fuente inicial:
 
 - En vez de solo ser a blanco y negro ahora tendrá un color verde claro y tonos b/n (dando una semejanza a una cancha de fútbol).
 - Se implementó un jugador 2, convirtiendo el juego en multiplayer, tienen marcadores individuales y un límite de victoria de 3 goles.
 - Ya no es un juego silencioso pues se asignaron 2 sonidos distintos, uno al ser golpeado el balón por un jugador y otro cuando el balón rebote en paredes.
+
+## 8. Bibliografía:
+- Referencia base del [ping pong tradicional uniplayer](http://ingenieriaelectronica.org/juego-de-ping-pong-con-arduino-y-processing-version-1/ "Título").
+- [Manejo de escritura y tipo de letras](http://www.programacionyrobotica.com/mostrando-informacion-en-processing/ "Título").
+- [Librería Minim y su uso para sonidos](http://dunadigital.com/processing/2014/01/14/como-reproducir-un-sonido/ "Título").
