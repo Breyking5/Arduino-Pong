@@ -13,17 +13,14 @@ Ing. Paulo Chiliguano.
 
 La idea del proyecto fue encontrado en [hackster.io](https://www.hackster.io "Título").
 
-### Nota:
-_El proyecto aún está en proceso, por ende el siguiente informe por ahora **solo contendrá las partes de código e información** tanto de Arduino como de processing_ según se vaya desarrollando.
-
 ## 1. Introducción:
 
-El siguiente proyecto busca diseñar el juego clásico de _"Ping Pong"_ combinando los mecanismos que brinda Arduino para el control físico y Processing para la interfaz de usuario, brindado una calidad de juego entretenida para el usuario.
+El siguiente trabajo busca mejorar el juego clásico de _"Ping Pong"_ combinando los mecanismos que brinda Arduino para el control físico y Processing para la interfaz de usuario, brindado un juego entretenido y de una calidad visual agradable para el usuario.
 
 ## 2. Materiales:
 - 1 Arduino
-- 1 Potenciometro de 5 K ohms
-- 3 Jumpers aproximadamente 10 Centímetros
+- 2 Potenciometros de 10 K ohms
+- 6 Jumpers aproximadamente 10 Centímetros
 - 1 Protoboard
 
 ## 3. Conceptos:
@@ -36,97 +33,268 @@ Es una plataforma de hardware y software de código abierto, basada en una senci
 
 ### * Arduino:
 ```
-int potPin=0;
+/*
+Arduino + Processing - Ping Pong
+By.:
+Flores Alejandra
+Ibarra Brayan
+Troya Jaime
+*/
+
+  int const potPin1=A2;
+  int const potPin2=A0;
+  
 void setup(){
-Serial.begin(19200);
+  Serial.begin(9600);
 }
 void loop(){
-int val=analogRead(potPin);
-val=val/4;
-Serial.write(val); //
-delay(100);
+  String dati = "";
+  dati += analogRead(potPin1);
+  dati += '-';
+  dati += analogRead(potPin2);
+  Serial.println(dati);
+  delay(100);
 }
 ```
 ### * Processing:
 ```
-/**
-* Programa PinPong.
-*
-* 5 Junio 2013 Douglass Mejia
+/*
+Arduino + Processing - Ping Pong
+By.:
+Flores Alejandra
+Ibarra Brayan
+Troya Jaime
 */
+
 import processing.serial.*;
-String portname = "COM8"; // aquí colocamos el puerto por el que recibimos el dato
-Serial port; // Creamos un objeto llamado port de la clase Serial
-// Variables para definir la pelota
-float ball_x;
-float ball_y;
-float ball_dir = 1;
-float ball_size = 5; // Radio
-float dy = 0; // Dirección
-// variables para definir la pala
-int paddle_width = 5;
-int paddle_height = 20;
-int paddle_pos; // nueva posición
-int paddle_ppos; // última posición
-int dist_wall = 15;
-void setup()
-{
-size(255, 255);
-rectMode(CENTER);
-ellipseMode(CENTER);
-noStroke();
-smooth();
-ball_y = height/2;
-ball_x = 1;
-// Abre el puerto al que esta conectada la tarjeta con una velocidad de (19200 bps)
-port = new Serial(this, portname, 19200);
+import ddf.minim.*;
+
+String portname = "COM3";
+Serial Port;
+int[] posicion;
+int pad1 = 100;
+int pad2 = 15;
+int dim_pantalla = 20;
+float p1pos,p2pos;
+float x,y,v_x,v_y;
+float init_x,init_y;
+int rebotes;
+boolean start = false;
+boolean iniciar = true;
+int punto1,punto2;
+boolean ganar = false;
+boolean titulo = true;
+boolean pausa = false;
+
+Minim minim;
+AudioPlayer sonido_ping;
+AudioPlayer sonido_pong;
+
+void setup(){
+  size(800,600);
+  init_x = width/2;
+  init_y = height/2;
+  noCursor();
+  Port = new Serial(this, portname, 9600);
+  Port.bufferUntil('\n');
+  textFont(loadFont("AgencyFB-Bold-250.vlw"),100);
+  textAlign(CENTER);
+  minim = new Minim(this);
+  sonido_ping = minim.loadFile("ping.mp3");
+  sonido_pong = minim.loadFile("pong.mp3");
 }
-void draw()
-{
-background(51);
-ball_x += ball_dir * 2.0;
-ball_y += dy;
-if(ball_x > width+ball_size) {
-ball_x = -width/2 - ball_size;
-ball_y = random(0, height);
-dy = 0;
+
+void draw(){
+ if(!pausa){ 
+  if(ganar){
+    puntaje();
+    if(punto1>punto2){
+      stroke(0);
+      strokeWeight(2);
+      fill(0);
+      textAlign(CENTER,CENTER);
+      textSize(90);
+      text("GANA",width*0.25,height/2);
+      text("PIERDE",width*0.75,height/2);
+      textSize(70);
+      strokeWeight(2);
+    }
+    else{
+      stroke(0);
+      strokeWeight(2);
+      fill(0);
+      textAlign(CENTER,CENTER);
+      textSize(90);
+      text("PIERDE",width*0.25,height/2);
+      text("GANA",width*0.75,height/2);
+      textSize(70);
+      strokeWeight(2);
+    }
+  }
+  
+  if(titulo){
+    background(#6BDE81);
+    pantalla_titulo();
+    fill(255);
+  }
+  
+  if(start){
+    textSize(100);
+    background(#6BDE81);
+    campo();
+    fill(255);
+    puntaje();
+    if(iniciar){
+      x = init_x;
+      y = init_y;
+      v_x = random(2,3)*rnd_sign();
+      v_y = random(2,3)*rnd_sign();
+      rebotes = 0;
+      iniciar = !iniciar;
+    }
+    posicionPad();
+    pelota();
+    }
+ }
 }
-if (port.available() > 0) { // Si el dato está disponible,
-paddle_ppos = paddle_pos; // guarda la ultima posición
-paddle_pos = port.read(); // lee y almacena la nueva posición
+
+void serialEvent (Serial Port) {
+  String stringa = Port.readStringUntil('\n');
+  if (stringa != null) {
+    stringa = trim(stringa);
+    posicion = get_position(stringa);
+  }
 }
-// Desplaza la pala verticalmente en la pantalla
-float paddle_y = constrain(paddle_pos, paddle_height, height-paddle_height);
-// Testea si la pelota toca la pala
-float py = width-dist_wall-paddle_width-ball_size;
-if(ball_x == py
-&& ball_y > paddle_y - paddle_height - ball_size
-&& ball_y < paddle_y + paddle_height + ball_size) {
-ball_dir *= -1;
-if(paddle_pos != paddle_ppos) {
-dy = (paddle_pos - paddle_ppos)/2.0;
-if(dy > 5) { dy = 5; }
-if(dy < -5) { dy = -5; }
+
+float rnd_sign(){
+  float n = random(-1,1);
+  if(n>=0){
+    return 1.0;
+  }
+  else{
+    return -1.0;
+  }
 }
+
+void campo(){
+  stroke(0);
+  strokeWeight(2);
+  fill(0);
+  rectMode(CORNER);
+  rect(0,0,width,10);
+  rect(0,height-10,width,10);
+  strokeWeight(2);
+  int segmenti=25;
+  for(int i=0;i<segmenti;i++){
+    if(i%2==0){
+      line(width/2,i*(height/segmenti),width/2,i*(height/segmenti)+(height/segmenti));
+    }
+  }
+  noFill();
+  ellipse(width/2,height/2,150,150);
 }
-// Si la pelota toca la pala o la pared, cambia de dirección
-if(ball_x < ball_size && ball_dir == -1) {
-ball_dir *= -1;
+
+void pantalla_titulo(){
+  stroke(0);
+  strokeWeight(2);
+  fill(0);
+  rectMode(CORNER);
+  rect(0,0,width,10);
+  rect(0,height-10,width,10);
+  strokeWeight(2);
+  textAlign(CENTER,CENTER);
+  textSize(100);
+  text("JUEGO MULTIPLAYER\nBREYKING PONG\nARDUINO+PROCESSING",width/2,height*0.35);
+  textSize(60);
+  text("I : INICIAR   P : PAUSA",width/2,height*0.8);
 }
-// Si la pelota toca la parte superior o inferior del borde, cambia dirección
-if(ball_y > height-ball_size) {
-dy = dy * -1;
+
+int[] get_position(String dati){
+  return int(split(dati,'-'));
 }
-if(ball_y < ball_size) {
-dy = dy * -1;
+
+void posicionPad(){
+  p1pos = map(posicion[0],0,1023,10+pad1/2,height-(10+pad1/2));
+  p2pos = map(posicion[1],0,1023,10+pad1/2,height-(10+pad1/2));
+  rectMode(CENTER);
+  rect(20+pad2/2,p1pos,pad2,pad1,5);
+  rect(width-(20+pad2/2),p2pos,pad2,pad1,5);
 }
-// Dibuja la pelota
-fill(255);
-ellipse(ball_x, ball_y, ball_size, ball_size);
-stroke(255,255,255);
-// Dibuja la paleta
-fill(153);
-rect(width-dist_wall, paddle_y, paddle_width, paddle_height);
-rect(2, paddle_y, paddle_width, paddle_height);
+
+void pelota(){
+  fill(0);
+  stroke(0);
+  ellipse(x,y,dim_pantalla,dim_pantalla);
+  x=x+v_x;
+  y=y+v_y;
+  
+  if(y<10+dim_pantalla/2 || y>height-(10+dim_pantalla/2)){
+    v_y=-v_y;
+    sonido_ping.pause();
+    sonido_ping.rewind();
+    sonido_pong.pause();
+    sonido_pong.rewind();
+    sonido_pong.play();
+  }
+  if((v_x<0 && x<20+pad2+dim_pantalla/2 && x>20+pad2/2 && y>=p1pos-pad1/2 && y<=p1pos+pad1/2) || (v_x>0 && x>width-(20+pad2+dim_pantalla/2) && x<width-(20+pad2/2) && y>=p2pos-pad1/2 && y<=p2pos+pad1/2)){
+    if(rebotes<20){
+      v_x = -1.1*v_x;
+      rebotes++;
+    }
+    else{
+      v_x = -v_x;
+    }
+    sonido_pong.pause();
+    sonido_pong.rewind();
+    sonido_ping.pause();
+    sonido_ping.rewind();
+    sonido_ping.play();
+  }
+  if(x<0){
+    punto2++;
+    iniciar = true;
+  }
+  if(x>width){
+    punto1++;
+    iniciar = true;
+  }
+}
+
+void puntaje(){
+  textSize(90);
+  text(punto1,(width/2)*0.85,height/6);
+  text(punto2,(width/2)*1.15,height/6);
+  textSize(70);
+  if(punto1 == 3){
+    ganar = true;
+    start = false;
+  }
+  if(punto2 == 3){
+    ganar = true;
+    start = false;
+  }
+}
+
+void keyPressed(){
+  if((key == 'i' && !pausa)||(key == 'I' && !pausa)){
+    start = !start;
+    iniciar = true;
+    punto1 = 0;
+    punto2 = 0;
+    titulo = !titulo;  
+  }
+  if(ganar){
+    ganar = false;
+    start = false;
+    titulo = true;
+  }
+  if((key == 'p' && start)||(key == 'P' && !pausa)){
+    pausa = !pausa;
+  }
 }
 ```
+## 5. Resultado:
+### Se obtiene como resultado final un juego de ping pong con nuevas características añadidas a la base tomada de la fuente inicial:
+- En vez de solo ser a blanco y negro ahora tendrá un color verde claro y tonos b/n (dando una semejanza a una cancha de fútbol).
+- Se implementó un jugador 2, convirtiendo el juego en multiplayer, tienen marcadores individuales y un límite de victoria de 3 goles.
+- Ya no es un juego silencioso pues se asignaron 2 sonidos distintos, uno al ser golpeado el balón por un jugador y otro cuando el balón rebote en paredes.
